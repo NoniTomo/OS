@@ -14,12 +14,9 @@ void consumer_function()
 	while (true)
 	{
 		unique_lock<mutex> mutex_lock(mtx);
-		{
-			cond_var.wait(mutex_lock, []() {return flag; });
-			flag = false;
-
-			cout << "Событие обработано\n";
-		}
+		cond_var.wait(mutex_lock, []() {return flag; });
+		flag = false;
+		cout << "Обработано событие\n";
 	}
 }
 
@@ -28,13 +25,12 @@ void producer_function()
 	while (true)
 	{
 		this_thread::sleep_for(chrono::seconds(1));
-		
-		unique_lock<mutex> mutex_lock(mtx);
-		flag = true;
-		
-		cond_var.notify_one();
-
-		cout << "Событие отправлено\n";
+		{
+			unique_lock<mutex> mutex_lock(mtx);
+			flag = true;
+			cout << "Отправлено событие\n";
+			cond_var.notify_one();
+		}
 	}
 }
 
